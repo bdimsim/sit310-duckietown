@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>open_loop_square</name>
+  <name>open_loop_square_pkg</name>
   <version>0.0.0</version>
   <description>The open_loop_square package</description>
 
