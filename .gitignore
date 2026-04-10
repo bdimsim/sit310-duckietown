@@ -1,5 +1,7 @@
 docs/build
 *pyc
+/packages/straights_and_turns_turtle_pkg/src/v1.py
+/packages/straights_and_turns_turtle_pkg/src/v2.py
 
 # documentation artifacts
 html/*
