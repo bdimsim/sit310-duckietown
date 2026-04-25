@@ -6,8 +6,8 @@ import math
 
 class ClosedLoopSquare:
     def __init__(self):
-        self.TICKS_PER_METRE = 300
-        self.WHEEL_TRACK = 0.1
+        self.TICKS_PER_METRE = 670
+        self.TICKS_PER_90_DEG = 95
 
         self.cmd_msg = Twist2DStamped()
 
@@ -26,7 +26,7 @@ class ClosedLoopSquare:
         self.target_distance = 1.0
         self.target_angle = math.pi / 2
         self.speed = 0.2
-        self.angular_speed = 2.0
+        self.angular_speed = 1.0
         
         # Pose callback variables
         self.start_pose = None
@@ -34,6 +34,7 @@ class ClosedLoopSquare:
         self.pose_received = False
 
         rospy.init_node('closed_loop_square_node', anonymous=True)
+        rospy.loginfo('node initialised!')
         
         self.pub = rospy.Publisher(
             '/duckiebot1/car_cmd_switch_node/cmd', 
@@ -41,19 +42,25 @@ class ClosedLoopSquare:
             queue_size=1
         )
         
+        rospy.loginfo('Subscribed to /duckiebot1/car_cmd_switch_node/cmd')
+        
         rospy.Subscriber(
-            '/duckiebot1/left_wheel_encoder_node/tick',
+            '/duckiebot1/left_wheel_encoder_driver_node/tick',
             WheelEncoderStamped,
             self.left_callback,
             queue_size=1
         )
         
+        rospy.loginfo('Subscribed to /duckiebot1/left_wheel_encoder_driver_node/tick')
+        
         rospy.Subscriber(
-            '/duckiebot1/right_wheel_encoder_node/tick',
+            '/duckiebot1/right_wheel_encoder_driver_node/tick',
             WheelEncoderStamped,
             self.right_callback,
             queue_size=1
         )
+        
+        rospy.loginfo('Subscribed to /duckiebot1/right_wheel_encoder_driver_node/tick')
         
         rospy.Subscriber(
             '/duckiebot1/velocity_to_pose_node/pose',
@@ -61,6 +68,8 @@ class ClosedLoopSquare:
             self.pose_callback,
             queue_size=1
         )
+        
+        rospy.loginfo('Subscribed to /duckiebot1/velocity_to_pose_node/pose')
         
     # Encoder tick callbacks
     def left_callback(self, msg):
@@ -101,13 +110,7 @@ class ClosedLoopSquare:
         # https://control.ros.org/rolling/doc/ros2_controllers/doc/mobile_robot_kinematics.html
         avg_delta_ticks = (delta_left_ticks + delta_right_ticks) / 2.0
         return abs((avg_delta_ticks / self.TICKS_PER_METRE))
-
-    def rotation_radians(self):
-        delta_left_ticks, delta_right_ticks = self.compute_delta_ticks()
-        # https://control.ros.org/rolling/doc/ros2_controllers/doc/mobile_robot_kinematics.html
-        # rosparam get /duckiebot1/kinematics_node/baseline = 0.1 (w)
-        difference_delta_ticks = delta_right_ticks - delta_left_ticks
-        return (difference_delta_ticks / self.TICKS_PER_METRE * self.WHEEL_TRACK)
+    
         
     def go_straight(self, distance, speed):
         if not self.ticks_calibrated:
@@ -121,22 +124,21 @@ class ClosedLoopSquare:
         else:
             return True
     
-    def go_rotate(self, angle, angular_speed):
+    def go_rotate_90(self, angle, angular_speed):
         if not self.ticks_calibrated:
             self.calibrate_start_ticks()
         
-        if abs(self.rotation_radians()) < abs(angle):
+        delta_left, delta_right = self.compute_delta_ticks()
+        difference_delta_ticks = delta_right - delta_left
+        target_ticks = self.TICKS_PER_90_DEG * (abs(angle) / (math.pi / 2))
+        
+        if abs(difference_delta_ticks) < target_ticks:
             self.cmd_msg.v = 0
             self.cmd_msg.omega = angular_speed if angle > 0 else -angular_speed
             return False
         else:
             return True
-        
-    # State machine logic:
-    # 1. Start in 'idle' state, wait for moving to be True (which it is by default)
-    # 2. Transition to 'straight' state, move forward until target distance is reached
-    # 3. Transition to 'rotate' state, rotate until target angle is reached
-    # 4. Repeat 2-3 until 4 sides are completed, then transition back to 'idle'
+
     def closed_loop_square(self):
         if self.curr_left_ticks is None or self.curr_right_ticks is None:
             return
@@ -155,16 +157,9 @@ class ClosedLoopSquare:
                 self.state = 'rotate'
                 self.ticks_calibrated = False
         elif self.state == 'rotate':
-            done = self.go_rotate(self.target_angle, self.angular_speed) # 90deg, 2.0
+            done = self.go_rotate_90(self.target_angle, self.angular_speed) # 90deg, 2.0
 
             if done:
-                delta_left_ticks, delta_right_ticks = self.compute_delta_ticks()
-                difference_delta_ticks = delta_right_ticks - delta_left_ticks
-                
-                rospy.loginfo(
-                    f'90deg rotation used tick difference: {difference_delta_ticks} ticks'
-                )
-
                 self.stop_robot()
                 self.side_count += 1
                 self.ticks_calibrated = False
@@ -174,16 +169,14 @@ class ClosedLoopSquare:
                     self.moving = False
                     
                     rospy.loginfo(
-                        f'START pose: ',
-                        f'x={self.start_pose.x} ',
-                        f'y={self.start_pose.y} ',
+                        f'START pose: x={self.start_pose.x} '
+                        f'y={self.start_pose.y} '
                         f'theta={self.start_pose.theta}'
                     )
                     
                     rospy.loginfo(
-                        f'END pose: ',
-                        f'x={self.end_pose.x} ',
-                        f'y={self.end_pose.y} ',
+                        f'END pose: x={self.end_pose.x} '
+                        f'y={self.end_pose.y} '
                         f'theta={self.end_pose.theta}'
                     )
                 else:
@@ -203,4 +196,4 @@ if __name__ == '__main__':
         state_machine = ClosedLoopSquare()
         state_machine.run()
     except rospy.ROSInterruptException:
-        pass
+        passadw
