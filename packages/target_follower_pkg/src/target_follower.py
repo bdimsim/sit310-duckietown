@@ -93,7 +93,7 @@ class Target_Follower:
         # negative x, sign is left ---> Need to rotate left  ---> Need positive omega
         # positive x, sign is right ---> Need to rotate right ---> Need negative omega
         # We need to scale x with a constant to control rotation speed and direction
-        k_x = 0.8
+        k_x = 1.5
         deadband = 0.05 # In metres
         omega = -k_x * x
 
