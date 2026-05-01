@@ -1,0 +1,67 @@
+version: 1.0
+traffic_signs:
+  map_0/sign_stop_0:
+    id: 0
+    type: sign_stop
+    family: 36h11
+  map_0/sign_stop_1:
+    id: 1
+    type: sign_stop
+    family: 36h11
+  map_0/sign_right_T_intersect_2:
+    id: 2
+    type: sign_right_T_intersect
+    family: 36h11
+  map_0/sign_left_T_intersect_3:
+    id: 3
+    type: sign_left_T_intersect
+    family: 36h11
+  map_0/sign_yield_4:
+    id: 4
+    type: sign_yield
+    family: 36h11
+  map_0/sign_no_right_turn_5:
+    id: 5
+    type: sign_no_right_turn
+    family: 36h11
+  map_0/sign_no_left_turn_6:
+    id: 6
+    type: sign_no_left_turn
+    family: 36h11
+  map_0/sign_oneway_left_7:
+    id: 7
+    type: sign_oneway_left
+    family: 36h11
+  map_0/sign_oneway_right_8:
+    id: 8
+    type: sign_oneway_right
+    family: 36h11
+  map_0/sign_do_not_enter_9:
+    id: 9
+    type: sign_do_not_enter
+    family: 36h11
+  map_0/sign_4_way_intersect_10:
+    id: 10
+    type: sign_4_way_intersect
+    family: 36h11
+  map_0/sign_T_intersection_11:
+    id: 11
+    type: sign_Tintersection
+    family: 36h11
+  map_0/sign_pedestrian_12:
+    id: 12
+    type: sign_pedestrian
+    family: 36h11
+  map_0/sign_t_light_ahead_13:
+    id: 13
+    type: sign_t_light_ahead
+    family: 36h11
+  map_0/sign_duck_crossing_14:
+    id: 14
+    type: sign_duck_crossing
+    family: 36h11
+  map_0/sign_parking_15:
+    id: 15
+    type: sign_parking
+    family: 36h11
+

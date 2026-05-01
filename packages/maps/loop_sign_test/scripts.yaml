@@ -1,0 +1,6 @@
+version: 1.0
+scripts:
+  map_0/sign_stop_0:
+    scripts:
+      - straight_line_script
+
